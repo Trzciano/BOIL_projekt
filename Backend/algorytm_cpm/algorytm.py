@@ -35,8 +35,20 @@ def calculate_early_start_finish(tasks):
             task.early_start = max_early_finish
             task.early_finish = task.early_start + task.duration
 
+def calculate_late_start_finish(tasks):
+    tasks[-1].late_finish = tasks[-1].early_finish
+    tasks[-1].late_start = tasks[-1].late_finish - tasks[-1].duration
+
+    for task in reversed(tasks[:-1]):
+        min_late_start = min([t.late_start for t in tasks if task.action in t.actions_before], default=tasks[-1].late_finish)
+        task.late_finish = min_late_start
+        task.late_start = task.late_finish - task.duration
+
 calculate_early_start_finish(tasks)
+calculate_late_start_finish(tasks)
 
 for task in tasks:
     #print(task.early_start)
-    print(task.early_finish)
+    #print(task.early_finish)
+    #print(task.late_start)
+    print(task.late_finish)
