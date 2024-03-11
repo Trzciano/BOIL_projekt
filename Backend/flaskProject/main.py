@@ -15,7 +15,7 @@ def post_cpm_table():
 
             for item in data_list:
                 action = item.get('action')
-                action_before = item.get('item_before')
+                action_before = item.get('action_before')
                 duration = item.get('duration')
 
                 new_row = TableCMPLeft(action, action_before, duration)
