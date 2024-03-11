@@ -7,8 +7,8 @@ class TableCMPLeft:
         self.early_finish = 0
         self.late_start = 0
         self.late_finish = 0
-        self.total_float = 0
         self.is_critical = False
+        self.reserve = 0
 
 tasks = [
     TableCMPLeft(action='A', actions_before='', duration=5),
@@ -43,12 +43,26 @@ def calculate_late_start_finish(tasks):
         min_late_start = min([t.late_start for t in tasks if task.action in t.actions_before], default=tasks[-1].late_finish)
         task.late_finish = min_late_start
         task.late_start = task.late_finish - task.duration
+    
+def calculate_reserve(tasks):
+    for task in tasks:
+        task.reserve = task.late_start - task.early_start
+    
+def find_critical_paths(tasks):
+    max_duration = max(task.early_finish for task in tasks)
+    for task in tasks:
+        if task.early_finish == max_duration or task.late_start == task.early_start:
+            task.is_critical = True
 
 calculate_early_start_finish(tasks)
 calculate_late_start_finish(tasks)
+calculate_reserve(tasks)
+find_critical_paths(tasks)
 
 for task in tasks:
     #print(task.early_start)
     #print(task.early_finish)
     #print(task.late_start)
-    print(task.late_finish)
+    #print(task.late_finish)
+    #print(task.reserve)
+    print(task.action,"\t ",task.duration,"\t ",task.early_start, "\t ",task.early_finish,"\t ",task.late_start,"\t ",task.late_finish, "\t ", task.reserve, "\t ", task.is_critical)
