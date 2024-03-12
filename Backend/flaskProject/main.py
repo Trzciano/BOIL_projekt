@@ -1,10 +1,13 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from Classes.TableCMPLeft import TableCMPLeft
 from Classes.TableCMPRight import TableCMPRight
 from algorytm_cpm.algorytm import calculate_cpm_left
 
 
 app = Flask(__name__)
+CORT(app, resources={r"/*": {"origins": ""}}, supports_credentials=False)
+
 
 @app.route('/cpmtable_left', methods=['POST'])
 def post_cpm_table_left():
