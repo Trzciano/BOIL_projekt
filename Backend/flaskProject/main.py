@@ -6,7 +6,7 @@ from algorytm_cpm.algorytm import calculate_cpm_left
 
 
 app = Flask(__name__)
-CORT(app, resources={r"/*": {"origins": ""}}, supports_credentials=False)
+CORS(app, resources={r"/*": {"origins": ""}}, supports_credentials=False)
 
 
 @app.route('/cpmtable_left', methods=['POST'])
