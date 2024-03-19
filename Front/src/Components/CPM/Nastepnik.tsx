@@ -1,21 +1,15 @@
-import { useEffect, useState } from "react";
-import apiGet from "../../api/api";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { CPMModel } from "../../api/CPMModel";
 import {
-  Autocomplete,
   Box,
   Button,
   Container,
-  Grid,
   IconButton,
   List,
   ListItem,
   ListItemText,
-  MenuItem,
-  Select,
   TextField,
   Typography,
 } from "@mui/material";
@@ -44,14 +38,6 @@ const Nastepniki = () => {
       return "Ta nazwa już istnieje";
     }
     return true;
-  };
-
-  const onSubmit: SubmitHandler<CPMModelNext> = async (data: CPMModelNext) => {
-    try {
-      console.log(data);
-    } catch (error: any) {
-      console.error("Błąd:", error);
-    }
   };
 
   const onRowAdd = async (data: CPMModelNext) => {

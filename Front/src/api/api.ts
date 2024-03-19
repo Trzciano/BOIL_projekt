@@ -1,7 +1,5 @@
-import react from 'react'
-
-const baseURL = 'https://localhost:5000';
-const apiGet = async <T>(endpoint : string): Promise<T> => {
+const baseURL = 'http://localhost:5000';
+const APIget = async <T>(endpoint : string): Promise<T> => {
     const response = await fetch(`${baseURL}/${endpoint}`, {
         method: 'GET',
 
@@ -15,4 +13,16 @@ const apiGet = async <T>(endpoint : string): Promise<T> => {
       return data;
   };
 
-export default apiGet;
+const APIpost = async (endpoint : string, body : any) => {
+    const response = await fetch(`${baseURL}/${endpoint}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+    const data = await response.text();
+    return data;
+  };
+
+  export { APIget, APIpost };

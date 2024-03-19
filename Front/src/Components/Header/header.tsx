@@ -1,23 +1,9 @@
-import {
-  AppBar,
-  Box,
-  Toolbar,
-  Typography,
-  Button,
-  IconButton,
-  Menu,
-  MenuItem,
-  Avatar,
-  Breadcrumbs,
-  Link,
-} from "@mui/material";
-import { useLocation, useNavigate } from "react-router-dom";
-import React from "react";
+import { AppBar, Box, Toolbar, Typography, Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import Pages from "../../Common/pages";
 import pages from "../../Common/pages";
 
 const Header = () => {
-  const location = useLocation();
   const navigate = useNavigate();
 
   const handleCPMClick = () => {
