@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from Classes.TableCMPLeft import TableCMPLeft
 from Classes.TableCMPRight import TableCMPRight
 from algorytm_cpm.algorytm import calculate_cpm_left
@@ -8,8 +8,8 @@ from algorytm_cpm.algorytm import calculate_cpm_left
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": ""}}, supports_credentials=False)
 
-
 @app.route('/cpmtable_left', methods=['POST'])
+@cross_origin()
 def post_cpm_table_left():
     if request.method == 'POST':
         data = request.get_json()
@@ -34,6 +34,7 @@ def post_cpm_table_left():
 
 
 @app.route('/cpmtable_right', methods=['POST'])
+@cross_origin()
 def post_cpm_table_right():
     if request.method == 'POST':
         data = request.get_json()
