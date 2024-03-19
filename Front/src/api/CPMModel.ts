@@ -1,5 +1,5 @@
 export interface CPMModel {
-    name: string;
-    time: number;
-    pn: string[];
+    action: string;
+    duration: number;
+    actions_before: string[];
 }

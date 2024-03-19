@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import apiGet from "../../api/api";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { APIpost } from "../../api/api";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { CPMModel } from "../../api/CPMModel";
@@ -9,16 +9,21 @@ import {
   Box,
   Button,
   Container,
-  Grid,
   IconButton,
   List,
   ListItem,
   ListItemText,
-  MenuItem,
-  Select,
   TextField,
   Typography,
 } from "@mui/material";
+
+interface ConvertedType {
+  cpm_table: {
+    action: string;
+    duration: number;
+    actions_before: string;
+  }[];
+}
 
 const Poprzednik = () => {
   const [cpmModelRows, setcpmModelRows] = useState<CPMModel[]>([]);
@@ -29,7 +34,7 @@ const Poprzednik = () => {
     event: React.ChangeEvent<{}>,
     value: CPMModel[]
   ) => {
-    const selectedNames = value.map((option) => option.name);
+    const selectedNames = value.map((option) => option.action);
     setSelectedOptions(selectedNames);
   };
 
@@ -42,30 +47,22 @@ const Poprzednik = () => {
   } = useForm<CPMModel>();
 
   const validateName = (value: string) => {
-    const isDuplicate = cpmModelRows.some((item) => item.name === value);
+    const isDuplicate = cpmModelRows.some((item) => item.action === value);
     if (isDuplicate) {
       return "Ta nazwa już istnieje";
     }
     return true;
   };
 
-  const onSubmit: SubmitHandler<CPMModel> = async (data: CPMModel) => {
-    try {
-      console.log(data);
-    } catch (error: any) {
-      console.error("Błąd:", error);
-    }
-  };
-
   const onRowAdd = async (data: CPMModel) => {
     try {
-      data.pn = selectedOptions;
+      data.actions_before = selectedOptions;
       setSelectedOptions([]);
 
       setcpmModelRows((prevList) => [...prevList, data]);
 
       reset();
-      setValue("pn", []);
+      setValue("actions_before", []);
     } catch (error: any) {
       console.error("Błąd:", error);
     }
@@ -80,6 +77,23 @@ const Poprzednik = () => {
     });
   };
 
+  const convertToConvertedType = (cpmModels: CPMModel[]): ConvertedType => {
+    const cpm_table = cpmModels.map((cpmModel) => ({
+      action: cpmModel.action,
+      duration: cpmModel.duration,
+      actions_before: cpmModel.actions_before.join(""),
+    }));
+
+    return { cpm_table };
+  };
+
+  const sendData = async () => {
+    const data = convertToConvertedType(cpmModelRows);
+    const return_data = APIpost("cpmtable_left", data);
+
+    console.log(return_data);
+  };
+
   return (
     <Container
       maxWidth="lg"
@@ -91,32 +105,32 @@ const Poprzednik = () => {
         </Typography>
         <Box display="flex">
           <TextField
-            {...register("name", {
+            {...register("action", {
               required: "Pole jest wymagane",
               validate: validateName,
             })}
             label="Nazwa"
             sx={{ marginTop: "4px", marginRight: "8px" }}
-            error={!!errors.name}
-            helperText={!!errors.name && errors.name.message}
+            error={!!errors.action}
+            helperText={!!errors.action && errors.action.message}
           />
           <TextField
-            {...register("time", {
+            {...register("duration", {
               required: "Pole jest wymagane",
               min: { value: 1, message: "Czas musi być większy niż 0" },
             })}
             type="number"
             label="Czas"
             sx={{ marginTop: "4px", marginRight: "8px" }}
-            error={!!errors.time}
-            helperText={!!errors.time && errors.time.message}
+            error={!!errors.duration}
+            helperText={!!errors.duration && errors.duration.message}
           />
           <Autocomplete
             multiple
             id="poprzednika-autocomplete"
             options={cpmModelRows}
             onChange={handleAutocompleteChange}
-            getOptionLabel={(option) => option.name}
+            getOptionLabel={(option) => option.action}
             renderInput={(params) => (
               <TextField
                 sx={{ marginTop: "4px", marginRight: "8px", width: "40vw" }}
@@ -124,7 +138,7 @@ const Poprzednik = () => {
                 variant="standard"
                 label="Poprzednika"
                 helperText="Proszę wybrać poprzednika"
-                {...register("pn")}
+                {...register("actions_before")}
               />
             )}
           />
@@ -155,14 +169,26 @@ const Poprzednik = () => {
               }
             >
               <ListItemText
-                primary={`Nazwa czynności: ${row.name} Czas trwania: ${row.time} Czynność bezpośrednio poprzedzająca: ${row.pn}`}
+                primary={`Nazwa czynności: ${row.action} Czas trwania: ${row.duration} Czynność bezpośrednio poprzedzająca: ${row.actions_before}`}
               />
             </ListItem>
           ))}
         </List>
       </form>
-      <Box>Tutaj będą grafy</Box>
+      <Box>
+        <Button
+          onClick={sendData}
+          type="button"
+          variant="contained"
+          color="primary"
+          sx={{ width: "100px", marginTop: "4px" }}
+        >
+          <AddIcon />
+          Generuj
+        </Button>
+      </Box>
     </Container>
   );
 };
+
 export default Poprzednik;
