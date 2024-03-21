@@ -6,7 +6,7 @@ tasks = [
     TableCMPRight(action='C', duration=6, sequence='2-4'),
     TableCMPRight(action='D', duration=7, sequence='3-5'),
     TableCMPRight(action='E', duration=1, sequence='5-7'),
-    TableCMPRight(action='F', duration=2, sequence='4-7'),
+    TableCMPRight(action='F', duration=7, sequence='4-7'),
     TableCMPRight(action='G', duration=3, sequence='4-6'),
     TableCMPRight(action='H', duration=4, sequence='6-7'),
     TableCMPRight(action='I', duration=1, sequence='7-8'),

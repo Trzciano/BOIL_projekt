@@ -58,30 +58,54 @@ def calculate_reserve(tasks):
     for task in tasks:
         task.reserve = task.late_start - task.early_start
     
+# def find_critical_paths(tasks):
+#     # Znajdź zadania, które mają rezerwę równą 0
+#     critical_tasks = [task for task in tasks if task.reserve == 0]
+
+#     # Znajdź najdłuższą ścieżkę krytyczną
+#     critical_path = []
+#     max_duration = 0
+#     for task in critical_tasks:
+#         path = [task]
+#         duration = task.duration
+#         while True:
+#             # Znajdź następne zadanie, które zależy od ostatniego zadania na ścieżce
+#             next_tasks = [t for t in critical_tasks if path[-1].action in t.actions_before]
+#             if not next_tasks:
+#                 break
+#             # Wybierz zadanie z największym czasem trwania
+#             next_task = max(next_tasks, key=lambda t: t.duration)
+#             path.append(next_task)
+#             duration += next_task.duration
+#         # Jeśli ścieżka jest dłuższa niż obecna ścieżka krytyczna, zaktualizuj ścieżkę krytyczną
+#         if duration > max_duration:
+#             critical_path = path
+#             max_duration = duration
+
+#     # Oznacz zadania na ścieżce krytycznej
+#     for task in critical_path:
+#         task.is_critical = True
+        
 def find_critical_paths(tasks):
     # Znajdź zadania, które mają rezerwę równą 0
     critical_tasks = [task for task in tasks if task.reserve == 0]
 
-    # Znajdź najdłuższą ścieżkę krytyczną
-    critical_path = []
-    max_duration = 0
+    # Znajdź wszystkie ścieżki krytyczne
+    critical_paths = []
     for task in critical_tasks:
-        path = [task]
-        duration = task.duration
-        while True:
-            # Znajdź następne zadanie, które zależy od ostatniego zadania na ścieżce
-            next_tasks = [t for t in critical_tasks if path[-1].action in t.actions_before]
-            if not next_tasks:
-                break
-            # Wybierz zadanie z największym czasem trwania
-            next_task = max(next_tasks, key=lambda t: t.duration)
-            path.append(next_task)
-            duration += next_task.duration
-        # Jeśli ścieżka jest dłuższa niż obecna ścieżka krytyczna, zaktualizuj ścieżkę krytyczną
-        if duration > max_duration:
-            critical_path = path
-            max_duration = duration
+        find_paths(task, [task], critical_paths, critical_tasks)
 
-    # Oznacz zadania na ścieżce krytycznej
-    for task in critical_path:
-        task.is_critical = True
+    # Oznacz zadania na ścieżkach krytycznych
+    for path in critical_paths:
+        for task in path:
+            task.is_critical = True
+
+    return critical_paths
+
+def find_paths(task, path, critical_paths, critical_tasks):
+    next_tasks = [t for t in critical_tasks if task.action in t.actions_before]
+    if not next_tasks:
+        critical_paths.append(path)
+    else:
+        for next_task in next_tasks:
+            find_paths(next_task, path + [next_task], critical_paths, critical_tasks)
