@@ -11,27 +11,28 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 
 const initialNodes = [
-    { id: 'A', position: { x: 0, y: 0 }, data: { label: 'A' } },
-    { id: 'B', position: { x: 0, y: 100 }, data: { label: 'B' } },
-    { id: 'C', position: { x: 0, y: 200 }, data: { label: 'C' } },
-    { id: 'D', position: { x: 0, y: 300 }, data: { label: 'D' } },
-    { id: 'E', position: { x: 0, y: 400 }, data: { label: 'E' } },
-    { id: 'F', position: { x: 0, y: 500 }, data: { label: 'F' } },
-    { id: 'G', position: { x: 0, y: 600 }, data: { label: 'G' } },
-    { id: 'H', position: { x: 0, y: 700 }, data: { label: 'H' } },
-
-
-
+    { id: '1', position: { x: 0, y: 0 }, data: { label: '1' } },
+    { id: '2', position: { x: 0, y: 100 }, data: { label: '2' } },
+    { id: '3', position: { x: 0, y: 200 }, data: { label: '3' } },
+    { id: '4', position: { x: 200, y: 0 }, data: { label: '4' } },
+    { id: '5', position: { x: 200, y: 100 }, data: { label: '5' } },
+    { id: '6', position: { x: 200, y: 200 }, data: { label: '6' } },
+    { id: '7', position: { x: 400, y: 100 }, data: { label: '7' } },
+    { id: '8', position: { x: 600, y: 100 }, data: { label: '8' } },
+    { id: '9', position: { x: 700, y: 100 }, data: { label: '9' } },
 ];
+
 const initialEdges = [
-    { id: 'eA-C', source: 'A', target: 'C' },
-    { id: 'eA-D', source: 'A', target: 'D' },
-    { id: 'eB-E', source: 'B', target: 'E' },
-    { id: 'eC-F', source: 'C', target: 'F' },
-    { id: 'eC-G', source: 'C', target: 'G' },
-    { id: 'eE-H', source: 'E', target: 'H' },
-    { id: 'eD-H', source: 'D', target: 'H' },
-    { id: 'eF-H', source: 'F', target: 'H' }
+    { id: 'A', source: '1', target: '2', label: 'A 3' },
+    { id: 'B', source: '2', target: '3', label: 'B 4' },
+    { id: 'C', source: '2', target: '4', label: 'C 6' },
+    { id: 'D', source: '3', target: '5', label: 'D 7' },
+    { id: 'E', source: '5', target: '7', label: 'E 7' },
+    { id: 'F', source: '4', target: '7', label: 'F 7' },
+    { id: 'G', source: '4', target: '6', label: 'G 7' },
+    { id: 'H', source: '6', target: '7', label: 'H 7' },
+    { id: 'I', source: '7', target: '8', label: 'I 7' },
+    { id: 'J', source: '8', target: '9', label: 'J 7' }
 
 ];
 
