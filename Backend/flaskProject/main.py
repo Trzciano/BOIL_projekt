@@ -1,8 +1,11 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
+
+from AlgorithmCPM.AlgorithmLeft import calculate_cpm_left
+from AlgorithmCPM.AlgorithmRight import calculate_cpm_right
 from Classes.TableCMPLeft import TableCMPLeft
 from Classes.TableCMPRight import TableCMPRight
-from algorytm_cpm.algorytm import calculate_cpm_left
+from Functions.TableToJson import convert_table_to_json
 
 
 app = Flask(__name__)
@@ -25,9 +28,12 @@ def post_cpm_table_left():
 
                 new_row = TableCMPLeft(action, actions_before, duration)
                 cpm_data.append(new_row)
+            
+            if len(cpm_data) < 2:
+                return jsonify({'error': 'Not enough data'})
 
-            calculate_cpm_left(cpm_data)
-            return jsonify({'message': 'Data received successfully'})
+            result = calculate_cpm_left(cpm_data)
+            return convert_table_to_json(result)
 
     else:
         return jsonify({'error': 'Wrong method'})
@@ -51,7 +57,12 @@ def post_cpm_table_right():
                 new_row = TableCMPRight(action, duration, sequence)
                 cpm_data.append(new_row)
 
-            return jsonify({'message': 'Data received successfully'})
+            if len(cpm_data) < 2:
+                return jsonify({'error': 'Not enough data'})
+
+            result = calculate_cpm_right(cpm_data)
+
+            return convert_table_to_json(result)
 
     else:
         return jsonify({'error': 'Wrong method'})

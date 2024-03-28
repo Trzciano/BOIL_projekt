@@ -3,3 +3,5 @@ class TableCMPRight:
         self.action = action
         self.duration = duration
         self.sequence = sequence
+        self.is_critical = False
+        
