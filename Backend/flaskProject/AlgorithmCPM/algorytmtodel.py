@@ -21,20 +21,6 @@ def calculate_early_start_finish(tasks):
             task.early_start = max_early_finish
             task.early_finish = task.early_start + task.duration
 
-def calculate_early_start_finish(tasks):
-    for task in tasks:
-        if not task.actions_before:
-            task.early_start = 0
-            task.early_finish = task.duration
-        else:
-            max_early_finish = 0
-            for action in task.actions_before:
-                for t in tasks:
-                    if t.action == action and t.early_finish > max_early_finish:
-                        max_early_finish = t.early_finish
-            task.early_start = max_early_finish
-            task.early_finish = task.early_start + task.duration
-
 def calculate_late_start_finish(tasks):
     tasks[-1].late_finish = tasks[-1].early_finish
     tasks[-1].late_start = tasks[-1].late_finish - tasks[-1].duration
@@ -53,3 +39,4 @@ def find_critical_paths(tasks):
     for task in tasks:
         if task.early_finish == max_duration or task.late_start == task.early_start:
             task.is_critical = True
+            
