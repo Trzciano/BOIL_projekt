@@ -23,7 +23,7 @@ import {
   TableRow,
   TableBody,
 } from "@mui/material";
-import { APIpost } from "../../api/api";
+import { APIImageGet, APIpost } from "../../api/api";
 
 interface CPMModelNext {
   name: string;
@@ -56,6 +56,7 @@ interface ReturnType {
 const Nastepniki = () => {
   const [cpmModelRows, setcpmModelRows] = useState<CPMModelNext[]>([]);
   const [returnedData, setReturnedData] = useState<ReturnType[]>([]);
+  const [imageData, setImageData] = useState<string | null>(null);
 
   const [editMode, setEditMode] = useState(false);
   const [indexToEdit, setIndexToEdit] = useState(0);
@@ -151,7 +152,11 @@ const Nastepniki = () => {
       data
     );
 
-    if (return_data) setReturnedData(return_data);
+    if (return_data) {
+      setReturnedData(return_data);
+      const imageUrl = URL.createObjectURL(await APIImageGet());
+      setImageData(imageUrl);
+    }
   };
 
   const rowStyle = (rowData: ReturnType) => {
@@ -163,6 +168,7 @@ const Nastepniki = () => {
     setEditMode(false);
     setcpmModelRows([]);
     setReturnedData([]);
+    setImageData(null);
   };
 
   return (
@@ -402,6 +408,9 @@ const Nastepniki = () => {
             </TableBody>
           </Table>
         </TableContainer>
+      </Box>
+      <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
+        {imageData && <img src={imageData} alt="Zdjęcie" />}
       </Box>
     </Container>
   );

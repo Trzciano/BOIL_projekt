@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { APIpost } from "../../api/api";
+import { APIImageGet, APIpost } from "../../api/api";
 import AddIcon from "@mui/icons-material/Add";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -53,6 +53,7 @@ const Poprzednik = () => {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [autocompleteKey, setAutocompleteKey] = useState(0);
   const [returnedData, setReturnedData] = useState<ReturnType[]>([]);
+  const [imageData, setImageData] = useState<string | null>(null);
 
   const [editMode, setEditMode] = useState(false);
   const [indexToEdit, setIndexToEdit] = useState(0);
@@ -173,7 +174,12 @@ const Poprzednik = () => {
       data
     );
 
-    if (return_data) setReturnedData(return_data);
+    if (return_data) {
+      setReturnedData(return_data);
+
+      const imageUrl = URL.createObjectURL(await APIImageGet());
+      setImageData(imageUrl);
+    }
   };
 
   const rowStyle = (rowData: ReturnType) => {
@@ -189,6 +195,7 @@ const Poprzednik = () => {
     setEditMode(false);
     setcpmModelRows([]);
     setReturnedData([]);
+    setImageData(null);
   };
 
   return (
@@ -404,6 +411,9 @@ const Poprzednik = () => {
             </TableBody>
           </Table>
         </TableContainer>
+      </Box>
+      <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
+        {imageData && <img src={imageData} alt="Zdjęcie" />}
       </Box>
     </Container>
   );
