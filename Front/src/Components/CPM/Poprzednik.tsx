@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { APIpost } from "../../api/api";
 import AddIcon from "@mui/icons-material/Add";
@@ -29,6 +29,8 @@ const Poprzednik = () => {
   const [cpmModelRows, setcpmModelRows] = useState<CPMModel[]>([]);
 
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+
+  const [autocompleteKey, setAutocompleteKey] = useState(0);
 
   const handleAutocompleteChange = (
     event: React.ChangeEvent<{}>,
@@ -63,6 +65,9 @@ const Poprzednik = () => {
 
       reset();
       setValue("actions_before", []);
+      setAutocompleteKey((prevKey) => prevKey + 1);
+
+      setSelectedOptions([]);
     } catch (error: any) {
       console.error("Błąd:", error);
     }
@@ -127,6 +132,7 @@ const Poprzednik = () => {
           />
           <Autocomplete
             multiple
+            key={autocompleteKey}
             id="poprzednika-autocomplete"
             options={cpmModelRows}
             onChange={handleAutocompleteChange}
