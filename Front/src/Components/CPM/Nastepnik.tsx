@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
+
 import {
   Box,
   Button,
@@ -10,9 +11,17 @@ import {
   List,
   ListItem,
   ListItemText,
+  Table,
+  TableContainer,
   TextField,
   Typography,
+  Paper,
+  TableCell,
+  TableHead,
+  TableRow,
+  TableBody,
 } from "@mui/material";
+import { APIpost } from "../../api/api";
 
 interface CPMModelNext {
   name: string;
@@ -21,8 +30,30 @@ interface CPMModelNext {
   next: number;
 }
 
+interface ConvertedType {
+  cpm_table: {
+    action: string;
+    duration: number;
+    sequence: string;
+  }[];
+}
+
+interface ReturnType {
+  source: Number;
+  target: Number;
+  action: string;
+  duration: Number;
+  early_start: Number;
+  early_finish: Number;
+  late_start: Number;
+  late_finish: Number;
+  reserve: Number;
+  is_critical: boolean;
+}
+
 const Nastepniki = () => {
   const [cpmModelRows, setcpmModelRows] = useState<CPMModelNext[]>([]);
+  const [returnedData, setReturnedData] = useState<ReturnType[]>([]);
 
   const {
     register,
@@ -50,13 +81,38 @@ const Nastepniki = () => {
     }
   };
 
-  const removeIngredient = (indexToRemove: number) => {
+  const remove = (indexToRemove: number) => {
     setcpmModelRows((prevList) => {
       const updatedList = prevList.filter(
         (_, index) => index !== indexToRemove
       );
       return updatedList;
     });
+  };
+
+  const convertToConvertedType = (cpmModels: CPMModelNext[]): ConvertedType => {
+    const cpm_table = cpmModels.map((cpmModel) => ({
+      action: cpmModel.name,
+      duration: Number(cpmModel.time),
+      sequence: `${cpmModel.prev}-${cpmModel.next}`,
+    }));
+    return { cpm_table };
+  };
+
+  const sendData = async () => {
+    console.log(cpmModelRows);
+    const data = convertToConvertedType(cpmModelRows);
+
+    const return_data = await APIpost<ConvertedType, ReturnType[]>(
+      "cpmtable_right",
+      data
+    );
+
+    if (return_data) setReturnedData(return_data);
+  };
+
+  const rowStyle = (rowData: ReturnType) => {
+    return rowData.is_critical ? { backgroundColor: "#FFD700" } : {};
   };
 
   return (
@@ -142,7 +198,7 @@ const Nastepniki = () => {
                 <IconButton
                   edge="end"
                   aria-label="delete"
-                  onClick={() => removeIngredient(index)}
+                  onClick={() => remove(index)}
                 >
                   <DeleteIcon />
                 </IconButton>
@@ -155,7 +211,54 @@ const Nastepniki = () => {
           ))}
         </List>
       </form>
-      <Box>Tutaj będą grafy</Box>
+      <Box>
+        <Button
+          onClick={sendData}
+          type="button"
+          variant="contained"
+          color="primary"
+          sx={{ width: "100px", marginTop: "4px" }}
+        >
+          <AddIcon />
+          Generuj
+        </Button>
+      </Box>
+      <Box sx={{ marginTop: "40px" }}>
+        <TableContainer component={Paper}>
+          <Table sx={{ minWidth: 650 }} aria-label="simple table">
+            <TableHead>
+              <TableRow>
+                <TableCell>Source</TableCell>
+                <TableCell>Target</TableCell>
+                <TableCell>Action</TableCell>
+                <TableCell>Duration</TableCell>
+                <TableCell>Early Start</TableCell>
+                <TableCell>Early Finish</TableCell>
+                <TableCell>Late Start</TableCell>
+                <TableCell>Late Finish</TableCell>
+                <TableCell>Reserve</TableCell>
+                <TableCell>Is Critical</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {returnedData.map((row, index) => (
+                <TableRow key={index} sx={rowStyle(row)}>
+                  <TableCell>{row.source.toString()}</TableCell>
+                  <TableCell>{row.target.toString()}</TableCell>
+                  <TableCell>{row.action}</TableCell>
+                  <TableCell>{row.duration.toString()}</TableCell>
+                  <TableCell>{row.early_start.toString()}</TableCell>
+                  <TableCell>{row.early_finish.toString()}</TableCell>
+                  <TableCell>{row.late_start.toString()}</TableCell>
+                  <TableCell>{row.late_finish.toString()}</TableCell>
+                  <TableCell>{row.reserve.toString()}</TableCell>
+                  <TableCell>{row.is_critical.toString()}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
     </Container>
   );
 };

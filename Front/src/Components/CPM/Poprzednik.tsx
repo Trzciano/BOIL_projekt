@@ -372,8 +372,8 @@ const Poprzednik = () => {
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead>
               <TableRow>
-                <TableCell>Source</TableCell>
-                <TableCell>Target</TableCell>
+                {/* <TableCell>Source</TableCell>
+                <TableCell>Target</TableCell> */}
                 <TableCell>Action</TableCell>
                 <TableCell>Duration</TableCell>
                 <TableCell>Early Start</TableCell>
@@ -387,8 +387,8 @@ const Poprzednik = () => {
             <TableBody>
               {returnedData.map((row, index) => (
                 <TableRow key={index} sx={rowStyle(row)}>
-                  <TableCell>{row.source.toString()}</TableCell>
-                  <TableCell>{row.target.toString()}</TableCell>
+                  {/* <TableCell>{row.source.toString()}</TableCell>
+                  <TableCell>{row.target.toString()}</TableCell> */}
                   <TableCell>{row.action}</TableCell>
                   <TableCell>{row.duration.toString()}</TableCell>
                   <TableCell>{row.early_start.toString()}</TableCell>
