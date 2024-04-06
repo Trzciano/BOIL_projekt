@@ -366,7 +366,9 @@ const Poprzednik = () => {
           Generuj
         </Button>
       </Box>
-
+      <Box>
+        Graph w send data
+      </Box>
       <Box sx={{ marginTop: "40px" }}>
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
