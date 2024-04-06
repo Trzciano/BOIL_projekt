@@ -16,7 +16,7 @@ const CPM = () => {
       sx={{ heiht: "100vh", paddingBottom: "30px", marginTop: "10vh" }}
     >
       <Typography variant="h3" marginTop={4} style={{ width: "100%" }}>
-        Metoda CPM
+        Metoda CPM {isToggled ? "- Poprzedniki" : "- Następniki"}
       </Typography>
 
       <Button variant="contained" onClick={handleClick}>
