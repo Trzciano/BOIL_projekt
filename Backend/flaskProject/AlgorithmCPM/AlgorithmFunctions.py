@@ -1,5 +1,4 @@
 from Classes.TableCMPLeft import TableCMPLeft
-from Classes.TableCMPRight import TableCMPRight
 
 
 def convert_table(tasks_right):
