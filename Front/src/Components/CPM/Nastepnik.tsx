@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
-
+import ModelTrainingIcon from "@mui/icons-material/ModelTraining";
 import {
   Box,
   Button,
@@ -55,17 +57,31 @@ const Nastepniki = () => {
   const [cpmModelRows, setcpmModelRows] = useState<CPMModelNext[]>([]);
   const [returnedData, setReturnedData] = useState<ReturnType[]>([]);
 
+  const [editMode, setEditMode] = useState(false);
+  const [indexToEdit, setIndexToEdit] = useState(0);
+
   const {
     register,
     handleSubmit,
+    setValue,
     reset,
     formState: { errors },
   } = useForm<CPMModelNext>();
 
-  // Niestandardowa funkcja walidacji sprawdzająca, czy nowa nazwa już istnieje
   const validateName = (value: string) => {
     const isDuplicate = cpmModelRows.some((item) => item.name === value);
     if (isDuplicate) {
+      return "Ta nazwa już istnieje";
+    }
+    return true;
+  };
+
+  const editValidateName = (value: string) => {
+    const isDuplicate = cpmModelRows.some((item) => item.name === value);
+    if (isDuplicate) {
+      if (value == cpmModelRows.at(indexToEdit)?.name) {
+        return true;
+      }
       return "Ta nazwa już istnieje";
     }
     return true;
@@ -81,6 +97,23 @@ const Nastepniki = () => {
     }
   };
 
+  const onRowEdit = async (data: CPMModelNext) => {
+    try {
+      setcpmModelRows((prevList) => {
+        return prevList.map((item, currentIndex) => {
+          if (currentIndex === indexToEdit) {
+            return data; // Zamień obiekt na indeksie index na nowy obiekt data
+          }
+          return item; // Zachowaj inne obiekty bez zmian
+        });
+      });
+      reset();
+      setEditMode(false);
+    } catch (error: any) {
+      console.error("Błąd:", error);
+    }
+  };
+
   const remove = (indexToRemove: number) => {
     setcpmModelRows((prevList) => {
       const updatedList = prevList.filter(
@@ -88,6 +121,17 @@ const Nastepniki = () => {
       );
       return updatedList;
     });
+  };
+
+  const edit = (indexToedit: number) => {
+    setEditMode(true);
+    setIndexToEdit(indexToedit);
+
+    const editedItem = cpmModelRows.at(indexToedit);
+    setValue("name", editedItem?.name!);
+    setValue("time", editedItem?.time!);
+    setValue("prev", editedItem?.prev!);
+    setValue("next", editedItem?.next!);
   };
 
   const convertToConvertedType = (cpmModels: CPMModelNext[]): ConvertedType => {
@@ -100,7 +144,6 @@ const Nastepniki = () => {
   };
 
   const sendData = async () => {
-    console.log(cpmModelRows);
     const data = convertToConvertedType(cpmModelRows);
 
     const return_data = await APIpost<ConvertedType, ReturnType[]>(
@@ -115,6 +158,13 @@ const Nastepniki = () => {
     return rowData.is_critical ? { backgroundColor: "#FFD700" } : {};
   };
 
+  const deleteAll = () => {
+    reset();
+    setEditMode(false);
+    setcpmModelRows([]);
+    setReturnedData([]);
+  };
+
   return (
     <Container
       maxWidth="lg"
@@ -122,86 +172,179 @@ const Nastepniki = () => {
     >
       <form>
         <Typography variant="h6" component="span" marginTop={4}>
-          Nowy wiersz
+          {editMode ? "Edytuj wiersz" : "Nowy Wiersz"}
         </Typography>
-        <Box display="flex">
-          <TextField
-            {...register("name", {
-              required: "Pole jest wymagane",
-              validate: validateName,
-            })}
-            label="Nazwa"
-            sx={{ marginTop: "4px", marginRight: "8px" }}
-            error={!!errors.name}
-            helperText={!!errors.name && errors.name.message}
-          />
-          <TextField
-            {...register("time", {
-              required: "Pole jest wymagane",
-              min: { value: 1, message: "Czas musi być większy niż 0" },
-            })}
-            type="number"
-            label="Czas"
-            sx={{ marginTop: "4px", marginRight: "8px" }}
-            error={!!errors.time}
-            helperText={!!errors.time && errors.time.message}
-          />
-          <TextField
-            {...register("prev", {
-              required: "Pole jest wymagane",
-              min: { value: 1, message: "Pole musi być większe niż 0" },
-              max: {
-                value: cpmModelRows.length + 1,
-                message: `Pole musi być większy niż ${cpmModelRows.length + 2}`,
-              },
-            })}
-            type="number"
-            label="Przed"
-            sx={{ marginTop: "4px", marginRight: "8px" }}
-            error={!!errors.prev}
-            helperText={!!errors.prev && errors.prev.message}
-          />{" "}
-          <TextField
-            {...register("next", {
-              required: "Pole jest wymagane",
-              min: { value: 1, message: "Pole musi być większe niż 0" },
-              max: {
-                value: cpmModelRows.length + 2,
-                message: `Pole musi być mniejsze niż ${
-                  cpmModelRows.length + 3
-                }`,
-              },
-            })}
-            type="number"
-            label="Po"
-            sx={{ marginTop: "4px", marginRight: "8px" }}
-            error={!!errors.next}
-            helperText={!!errors.next && errors.next.message}
-          />
-        </Box>
+        {!editMode ? (
+          <Box display="flex">
+            <TextField
+              {...register("name", {
+                required: "Pole jest wymagane",
+                validate: validateName,
+              })}
+              label="Nazwa"
+              sx={{ marginTop: "4px", marginRight: "8px" }}
+              error={!!errors.name}
+              helperText={!!errors.name && errors.name.message}
+            />
+            <TextField
+              {...register("time", {
+                required: "Pole jest wymagane",
+                min: { value: 1, message: "Czas musi być większy niż 0" },
+              })}
+              type="number"
+              label="Czas"
+              sx={{ marginTop: "4px", marginRight: "8px" }}
+              error={!!errors.time}
+              helperText={!!errors.time && errors.time.message}
+            />
+            <TextField
+              {...register("prev", {
+                required: "Pole jest wymagane",
+                min: { value: 1, message: "Pole musi być większe niż 0" },
+                max: {
+                  value: cpmModelRows.length + 1,
+                  message: `Pole musi być większy niż ${
+                    cpmModelRows.length + 2
+                  }`,
+                },
+              })}
+              type="number"
+              label="Przed"
+              sx={{ marginTop: "4px", marginRight: "8px" }}
+              error={!!errors.prev}
+              helperText={!!errors.prev && errors.prev.message}
+            />{" "}
+            <TextField
+              {...register("next", {
+                required: "Pole jest wymagane",
+                min: { value: 1, message: "Pole musi być większe niż 0" },
+                max: {
+                  value: cpmModelRows.length + 2,
+                  message: `Pole musi być mniejsze niż ${
+                    cpmModelRows.length + 3
+                  }`,
+                },
+              })}
+              type="number"
+              label="Po"
+              sx={{ marginTop: "4px", marginRight: "8px" }}
+              error={!!errors.next}
+              helperText={!!errors.next && errors.next.message}
+            />
+          </Box>
+        ) : (
+          <Box display="flex">
+            <TextField
+              {...register("name", {
+                required: "Pole jest wymagane",
+                validate: editValidateName,
+              })}
+              label="Nazwa"
+              sx={{ marginTop: "4px", marginRight: "8px" }}
+              error={!!errors.name}
+              helperText={!!errors.name && errors.name.message}
+            />
+            <TextField
+              {...register("time", {
+                required: "Pole jest wymagane",
+                min: { value: 1, message: "Czas musi być większy niż 0" },
+              })}
+              type="number"
+              label="Czas"
+              sx={{ marginTop: "4px", marginRight: "8px" }}
+              error={!!errors.time}
+              helperText={!!errors.time && errors.time.message}
+            />
+            <TextField
+              {...register("prev", {
+                required: "Pole jest wymagane",
+                min: { value: 1, message: "Pole musi być większe niż 0" },
+                max: {
+                  value: cpmModelRows.length + 1,
+                  message: `Pole musi być większy niż ${
+                    cpmModelRows.length + 2
+                  }`,
+                },
+              })}
+              type="number"
+              label="Przed"
+              sx={{ marginTop: "4px", marginRight: "8px" }}
+              error={!!errors.prev}
+              helperText={!!errors.prev && errors.prev.message}
+            />{" "}
+            <TextField
+              {...register("next", {
+                required: "Pole jest wymagane",
+                min: { value: 1, message: "Pole musi być większe niż 0" },
+                max: {
+                  value: cpmModelRows.length + 2,
+                  message: `Pole musi być mniejsze niż ${
+                    cpmModelRows.length + 3
+                  }`,
+                },
+              })}
+              type="number"
+              label="Po"
+              sx={{ marginTop: "4px", marginRight: "8px" }}
+              error={!!errors.next}
+              helperText={!!errors.next && errors.next.message}
+            />
+          </Box>
+        )}
+        {!editMode ? (
+          <Button
+            onClick={handleSubmit(onRowAdd)}
+            type="button"
+            variant="contained"
+            color="primary"
+            sx={{ width: "100px", marginTop: "4px" }}
+          >
+            <AddIcon />
+            Dodaj
+          </Button>
+        ) : (
+          <Button
+            onClick={handleSubmit(onRowEdit)}
+            type="button"
+            variant="contained"
+            color="primary"
+            sx={{ width: "100px", marginTop: "4px" }}
+          >
+            <SaveIcon />
+            Zapisz
+          </Button>
+        )}
         <Button
-          onClick={handleSubmit(onRowAdd)}
+          onClick={deleteAll}
           type="button"
           variant="contained"
-          color="primary"
-          sx={{ width: "100px", marginTop: "4px" }}
+          color="error"
+          sx={{ width: "100px", marginTop: "4px", marginLeft: "10px" }}
         >
-          <AddIcon />
-          Dodaj
+          <DeleteIcon />
+          Wyczyść
         </Button>
-
         <List>
           {cpmModelRows.map((row, index) => (
             <ListItem
               key={index}
               secondaryAction={
-                <IconButton
-                  edge="end"
-                  aria-label="delete"
-                  onClick={() => remove(index)}
-                >
-                  <DeleteIcon />
-                </IconButton>
+                <>
+                  <IconButton
+                    edge="end"
+                    aria-label="edit"
+                    onClick={() => edit(index)}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton
+                    edge="end"
+                    aria-label="delete"
+                    onClick={() => remove(index)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </>
               }
             >
               <ListItemText
@@ -213,13 +356,14 @@ const Nastepniki = () => {
       </form>
       <Box>
         <Button
+          disabled={cpmModelRows.length < 2}
           onClick={sendData}
           type="button"
           variant="contained"
           color="primary"
           sx={{ width: "100px", marginTop: "4px" }}
         >
-          <AddIcon />
+          <ModelTrainingIcon />
           Generuj
         </Button>
       </Box>

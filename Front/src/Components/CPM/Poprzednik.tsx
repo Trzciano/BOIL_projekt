@@ -5,6 +5,7 @@ import AddIcon from "@mui/icons-material/Add";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import ModelTrainingIcon from "@mui/icons-material/ModelTraining";
 import { CPMModel } from "../../api/CPMModel";
 import {
   Autocomplete,
@@ -318,7 +319,7 @@ const Poprzednik = () => {
           type="button"
           variant="contained"
           color="error"
-          sx={{ width: "100px", marginTop: "4px" }}
+          sx={{ width: "100px", marginTop: "4px", marginLeft: "10px" }}
         >
           <DeleteIcon />
           Wyczyść
@@ -356,13 +357,14 @@ const Poprzednik = () => {
       </form>
       <Box>
         <Button
+          disabled={cpmModelRows.length < 2}
           onClick={sendData}
           type="button"
           variant="contained"
           color="primary"
           sx={{ width: "100px", marginTop: "4px" }}
         >
-          <AddIcon />
+          <ModelTrainingIcon />
           Generuj
         </Button>
       </Box>
