@@ -2,7 +2,9 @@ import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { APIpost } from "../../api/api";
 import AddIcon from "@mui/icons-material/Add";
+import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import { CPMModel } from "../../api/CPMModel";
 import {
   Autocomplete,
@@ -13,6 +15,13 @@ import {
   List,
   ListItem,
   ListItemText,
+  Table,
+  TableBody,
+  Paper,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   TextField,
   Typography,
 } from "@mui/material";
@@ -25,12 +34,27 @@ interface ConvertedType {
   }[];
 }
 
+interface ReturnType {
+  source: Number;
+  target: Number;
+  action: string;
+  duration: Number;
+  early_start: Number;
+  early_finish: Number;
+  late_start: Number;
+  late_finish: Number;
+  reserve: Number;
+  is_critical: boolean;
+}
+
 const Poprzednik = () => {
   const [cpmModelRows, setcpmModelRows] = useState<CPMModel[]>([]);
-
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
-
   const [autocompleteKey, setAutocompleteKey] = useState(0);
+  const [returnedData, setReturnedData] = useState<ReturnType[]>([]);
+
+  const [editMode, setEditMode] = useState(false);
+  const [indexToEdit, setIndexToEdit] = useState(0);
 
   const handleAutocompleteChange = (
     event: React.ChangeEvent<{}>,
@@ -56,6 +80,17 @@ const Poprzednik = () => {
     return true;
   };
 
+  const editValidateName = (value: string) => {
+    const isDuplicate = cpmModelRows.some((item) => item.action === value);
+    if (isDuplicate) {
+      if (value == cpmModelRows.at(indexToEdit)?.action) {
+        return true;
+      }
+      return "Ta nazwa już istnieje";
+    }
+    return true;
+  };
+
   const onRowAdd = async (data: CPMModel) => {
     try {
       data.actions_before = selectedOptions;
@@ -73,7 +108,32 @@ const Poprzednik = () => {
     }
   };
 
-  const removeIngredient = (indexToRemove: number) => {
+  const onRowEdit = async (data: CPMModel) => {
+    try {
+      data.actions_before = selectedOptions;
+      setSelectedOptions([]);
+
+      setcpmModelRows((prevList) => {
+        return prevList.map((item, currentIndex) => {
+          if (currentIndex === indexToEdit) {
+            return data; // Zamień obiekt na indeksie index na nowy obiekt data
+          }
+          return item; // Zachowaj inne obiekty bez zmian
+        });
+      });
+
+      reset();
+      setValue("actions_before", []);
+      setAutocompleteKey((prevKey) => prevKey + 1);
+
+      setSelectedOptions([]);
+      setEditMode(false);
+    } catch (error: any) {
+      console.error("Błąd:", error);
+    }
+  };
+
+  const remove = (indexToRemove: number) => {
     setcpmModelRows((prevList) => {
       const updatedList = prevList.filter(
         (_, index) => index !== indexToRemove
@@ -82,10 +142,22 @@ const Poprzednik = () => {
     });
   };
 
+  const edit = (indexToedit: number) => {
+    setEditMode(true);
+    setIndexToEdit(indexToedit);
+
+    const editedItem = cpmModelRows.at(indexToedit);
+    setValue("action", editedItem?.action!);
+    setValue("duration", editedItem?.duration!);
+    setValue("actions_before", editedItem?.actions_before!);
+    setSelectedOptions(editedItem?.actions_before!);
+    setAutocompleteKey(indexToEdit);
+  };
+
   const convertToConvertedType = (cpmModels: CPMModel[]): ConvertedType => {
     const cpm_table = cpmModels.map((cpmModel) => ({
       action: cpmModel.action,
-      duration: cpmModel.duration,
+      duration: Number(cpmModel.duration),
       actions_before: cpmModel.actions_before.join(""),
     }));
 
@@ -94,9 +166,28 @@ const Poprzednik = () => {
 
   const sendData = async () => {
     const data = convertToConvertedType(cpmModelRows);
-    const return_data = APIpost("cpmtable_left", data);
 
-    console.log(return_data);
+    const return_data = await APIpost<ConvertedType, ReturnType[]>(
+      "cpmtable_left",
+      data
+    );
+
+    if (return_data) setReturnedData(return_data);
+  };
+
+  const rowStyle = (rowData: ReturnType) => {
+    return rowData.is_critical ? { backgroundColor: "#FFD700" } : {};
+  };
+
+  const deleteAll = () => {
+    reset();
+    setValue("actions_before", []);
+    setAutocompleteKey((prevKey) => prevKey + 1);
+
+    setSelectedOptions([]);
+    setEditMode(false);
+    setcpmModelRows([]);
+    setReturnedData([]);
   };
 
   return (
@@ -106,58 +197,131 @@ const Poprzednik = () => {
     >
       <form>
         <Typography variant="h6" component="span" marginTop={4}>
-          Nowy wiersz
+          {editMode ? "Edytuj wiersz" : "Nowy Wiersz"}
         </Typography>
-        <Box display="flex">
-          <TextField
-            {...register("action", {
-              required: "Pole jest wymagane",
-              validate: validateName,
-            })}
-            label="Nazwa"
-            sx={{ marginTop: "4px", marginRight: "8px" }}
-            error={!!errors.action}
-            helperText={!!errors.action && errors.action.message}
-          />
-          <TextField
-            {...register("duration", {
-              required: "Pole jest wymagane",
-              min: { value: 1, message: "Czas musi być większy niż 0" },
-            })}
-            type="number"
-            label="Czas"
-            sx={{ marginTop: "4px", marginRight: "8px" }}
-            error={!!errors.duration}
-            helperText={!!errors.duration && errors.duration.message}
-          />
-          <Autocomplete
-            multiple
-            key={autocompleteKey}
-            id="poprzednika-autocomplete"
-            options={cpmModelRows}
-            onChange={handleAutocompleteChange}
-            getOptionLabel={(option) => option.action}
-            renderInput={(params) => (
-              <TextField
-                sx={{ marginTop: "4px", marginRight: "8px", width: "40vw" }}
-                {...params}
-                variant="standard"
-                label="Poprzednika"
-                helperText="Proszę wybrać poprzednika"
-                {...register("actions_before")}
-              />
-            )}
-          />
-        </Box>
+        {!editMode ? (
+          <Box display="flex">
+            <TextField
+              {...register("action", {
+                required: "Pole jest wymagane",
+                validate: validateName,
+              })}
+              label="Nazwa"
+              sx={{ marginTop: "4px", marginRight: "8px" }}
+              error={!!errors.action}
+              helperText={!!errors.action && errors.action.message}
+            />
+            <TextField
+              {...register("duration", {
+                required: "Pole jest wymagane",
+                min: { value: 1, message: "Czas musi być większy niż 0" },
+              })}
+              type="number"
+              label="Czas"
+              sx={{ marginTop: "4px", marginRight: "8px" }}
+              error={!!errors.duration}
+              helperText={!!errors.duration && errors.duration.message}
+            />
+            <Autocomplete
+              multiple
+              key={autocompleteKey}
+              id="poprzednika-autocomplete"
+              options={cpmModelRows}
+              onChange={handleAutocompleteChange}
+              getOptionLabel={(option) => option.action}
+              renderInput={(params) => (
+                <TextField
+                  sx={{ marginTop: "4px", marginRight: "8px", width: "40vw" }}
+                  {...params}
+                  variant="standard"
+                  label="Poprzednika"
+                  helperText="Proszę wybrać poprzednika"
+                  {...register("actions_before")}
+                />
+              )}
+            />
+          </Box>
+        ) : (
+          <Box display="flex">
+            <TextField
+              {...register("action", {
+                required: "Pole jest wymagane",
+                validate: editValidateName,
+              })}
+              label="Nazwa"
+              sx={{ marginTop: "4px", marginRight: "8px" }}
+              error={!!errors.action}
+              helperText={!!errors.action && errors.action.message}
+            />
+            <TextField
+              {...register("duration", {
+                required: "Pole jest wymagane",
+                min: { value: 1, message: "Czas musi być większy niż 0" },
+              })}
+              type="number"
+              label="Czas"
+              sx={{ marginTop: "4px", marginRight: "8px" }}
+              error={!!errors.duration}
+              helperText={!!errors.duration && errors.duration.message}
+            />
+            <Autocomplete
+              multiple
+              key={autocompleteKey}
+              id="poprzednika-autocomplete"
+              options={cpmModelRows}
+              onChange={handleAutocompleteChange}
+              defaultValue={cpmModelRows.filter((obiekt) =>
+                cpmModelRows
+                  .at(indexToEdit)
+                  ?.actions_before!.includes(obiekt.action)
+              )}
+              getOptionLabel={(option) => option.action}
+              renderInput={(params) => (
+                <TextField
+                  sx={{ marginTop: "4px", marginRight: "8px", width: "40vw" }}
+                  {...params}
+                  variant="standard"
+                  label="Poprzednika"
+                  helperText="Proszę wybrać poprzednika"
+                  {...register("actions_before")}
+                />
+              )}
+            />
+          </Box>
+        )}
+
+        {!editMode ? (
+          <Button
+            onClick={handleSubmit(onRowAdd)}
+            type="button"
+            variant="contained"
+            color="primary"
+            sx={{ width: "100px", marginTop: "4px" }}
+          >
+            <AddIcon />
+            Dodaj
+          </Button>
+        ) : (
+          <Button
+            onClick={handleSubmit(onRowEdit)}
+            type="button"
+            variant="contained"
+            color="primary"
+            sx={{ width: "100px", marginTop: "4px" }}
+          >
+            <SaveIcon />
+            Zapisz
+          </Button>
+        )}
         <Button
-          onClick={handleSubmit(onRowAdd)}
+          onClick={deleteAll}
           type="button"
           variant="contained"
-          color="primary"
+          color="error"
           sx={{ width: "100px", marginTop: "4px" }}
         >
-          <AddIcon />
-          Dodaj
+          <DeleteIcon />
+          Wyczyść
         </Button>
 
         <List>
@@ -165,13 +329,22 @@ const Poprzednik = () => {
             <ListItem
               key={index}
               secondaryAction={
-                <IconButton
-                  edge="end"
-                  aria-label="delete"
-                  onClick={() => removeIngredient(index)}
-                >
-                  <DeleteIcon />
-                </IconButton>
+                <>
+                  <IconButton
+                    edge="end"
+                    aria-label="edit"
+                    onClick={() => edit(index)}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton
+                    edge="end"
+                    aria-label="delete"
+                    onClick={() => remove(index)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </>
               }
             >
               <ListItemText
@@ -192,6 +365,43 @@ const Poprzednik = () => {
           <AddIcon />
           Generuj
         </Button>
+      </Box>
+
+      <Box sx={{ marginTop: "40px" }}>
+        <TableContainer component={Paper}>
+          <Table sx={{ minWidth: 650 }} aria-label="simple table">
+            <TableHead>
+              <TableRow>
+                <TableCell>Source</TableCell>
+                <TableCell>Target</TableCell>
+                <TableCell>Action</TableCell>
+                <TableCell>Duration</TableCell>
+                <TableCell>Early Start</TableCell>
+                <TableCell>Early Finish</TableCell>
+                <TableCell>Late Start</TableCell>
+                <TableCell>Late Finish</TableCell>
+                <TableCell>Reserve</TableCell>
+                <TableCell>Is Critical</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {returnedData.map((row, index) => (
+                <TableRow key={index} sx={rowStyle(row)}>
+                  <TableCell>{row.source.toString()}</TableCell>
+                  <TableCell>{row.target.toString()}</TableCell>
+                  <TableCell>{row.action}</TableCell>
+                  <TableCell>{row.duration.toString()}</TableCell>
+                  <TableCell>{row.early_start.toString()}</TableCell>
+                  <TableCell>{row.early_finish.toString()}</TableCell>
+                  <TableCell>{row.late_start.toString()}</TableCell>
+                  <TableCell>{row.late_finish.toString()}</TableCell>
+                  <TableCell>{row.reserve.toString()}</TableCell>
+                  <TableCell>{row.is_critical.toString()}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Box>
     </Container>
   );
