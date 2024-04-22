@@ -1,4 +1,6 @@
-from flask import Flask, request, jsonify
+import os
+
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS, cross_origin
 
 from AlgorithmCPM.AlgorithmLeft import calculate_cpm_left
@@ -66,3 +68,13 @@ def post_cpm_table_right():
 
     else:
         return jsonify({'error': 'Wrong method'})
+    
+@app.route('/gantt_chart', methods=['GET'])
+@cross_origin()
+def send_gant_chart():
+    image_path = "AlgorithmCPM/ImageFolder/wykres.jpg"
+
+    if os.path.exists(image_path):
+        return send_file(image_path)
+    else:
+        return jsonify({'error': 'The file is not yet generated'})

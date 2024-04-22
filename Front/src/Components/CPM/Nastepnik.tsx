@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
@@ -23,7 +23,7 @@ import {
   TableRow,
   TableBody,
 } from "@mui/material";
-import { APIpost } from "../../api/api";
+import {APIImageGet, APIpost} from "../../api/api";
 
 import ReactFlow, {
   MiniMap,
@@ -31,15 +31,11 @@ import ReactFlow, {
   Background,
   useNodesState,
   useEdgesState,
-  addEdge,
-  Node,
-  Edge,
-  ReactFlowProvider,
-  Connection,
+  addEdge, Node, Edge, Connection,
 } from 'reactflow';
-import dagre from 'dagre';
 
 import 'reactflow/dist/style.css';
+import dagre from "dagre";
 
 interface CPMModelNext {
   name: string;
@@ -74,6 +70,7 @@ interface ReturnType {
 const Nastepniki = () => {
   const [cpmModelRows, setcpmModelRows] = useState<CPMModelNext[]>([]);
   const [returnedData, setReturnedData] = useState<ReturnType[]>([]);
+  const [imageData, setImageData] = useState<string | null>(null);
 
   const [editMode, setEditMode] = useState(false);
   const [indexToEdit, setIndexToEdit] = useState(0);
@@ -169,7 +166,11 @@ const Nastepniki = () => {
         data
     );
 
-    if (return_data) setReturnedData(return_data);
+    if (return_data) {
+      setReturnedData(return_data);
+      const imageUrl = URL.createObjectURL(await APIImageGet());
+      setImageData(imageUrl);
+    }
   };
 
   const rowStyle = (rowData: ReturnType) => {
@@ -181,6 +182,7 @@ const Nastepniki = () => {
     setEditMode(false);
     setcpmModelRows([]);
     setReturnedData([]);
+    setImageData(null);
   };
 
 
@@ -530,7 +532,11 @@ const Nastepniki = () => {
               </TableBody>
             </Table>
           </TableContainer>
+
         </Box>
+          <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
+              {imageData && <img src={imageData} alt="Zdjęcie" />}
+          </Box>
       </Container>
   );
 };
