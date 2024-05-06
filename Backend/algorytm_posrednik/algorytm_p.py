@@ -1,9 +1,9 @@
 import numpy as np
 
 dostawcy_podaz = [20,30]
-dostawcy_zakup = [10,12]
+dostawcy_koszt_produktu = [10,12]
 odbiorcy_popyt = [10,28,27]
-odbiorcy_cena_sprzedazy = [30,25,30]
+odbiorcy_zakup = [30,25,30]
 
 koszty_trans = [[8,14,17],
                 [12,9,19]]
@@ -14,7 +14,7 @@ macierz_zyskow = [[0 for _ in range(ilosc_odbiorcow)] for _ in range(ilosc_dosta
 
 for i in range(ilosc_dostawcow):
     for j in range(ilosc_odbiorcow):
-        macierz_zyskow[i][j] = odbiorcy_cena_sprzedazy[j] - dostawcy_zakup[i] - koszty_trans[i][j]
+        macierz_zyskow[i][j] = odbiorcy_zakup[j] - dostawcy_koszt_produktu[i] - koszty_trans[i][j]
 
 sum1 = np.sum(odbiorcy_popyt)
 sum2 = np.sum(dostawcy_podaz)
@@ -86,12 +86,20 @@ for row in koszty_trans:
     l = 0
     for col in row:
         result_transport += col * transport_matrix[k][l]
-        result_cena_zakupu += transport_matrix[k][l] * dostawcy_zakup[k]
-        result_cena_sprzedazy += transport_matrix[k][l] * odbiorcy_cena_sprzedazy[l]
+        result_cena_zakupu += transport_matrix[k][l] * dostawcy_koszt_produktu[k]
+        result_cena_sprzedazy += transport_matrix[k][l] * odbiorcy_zakup[l]
         l+=1
     k+=1
     
-print(result_transport)
-print(result_cena_zakupu)
-print(result_cena_sprzedazy)
-print(f"Zysk: {result_cena_sprzedazy - result_cena_zakupu - result_transport}")
+print(f"Koszty transportu: {result_transport}")
+print(f"Koszty zakupu: {result_cena_zakupu}")
+print(f"Przychód: {result_cena_sprzedazy}")
+zysk = result_cena_sprzedazy - result_cena_zakupu - result_transport
+print(f"Zysk: {zysk}")
+
+#Dane wyjsciowe:
+#transport_matrix - macierz wynikowa
+#result_transport - koszty transportu
+#result_cena_zakupu - koszty zakupu
+#result_cena_sprzedazy - przychód
+#zysk obliczamy result_cena_sprzedazy - result_cena_zakupu - result_transport
