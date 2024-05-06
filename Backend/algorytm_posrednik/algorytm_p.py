@@ -76,3 +76,22 @@ transport_matrix = optymalny_plan_przewozow(dostawcy_podaz, odbiorcy_popyt, maci
 # Wyświetlenie optymalnego planu przewozów
 for row in transport_matrix:
     print(row)
+
+l = 0
+k = 0 
+result_transport = 0
+result_cena_zakupu = 0
+result_cena_sprzedazy = 0
+for row in koszty_trans:
+    l = 0
+    for col in row:
+        result_transport += col * transport_matrix[k][l]
+        result_cena_zakupu += transport_matrix[k][l] * dostawcy_zakup[k]
+        result_cena_sprzedazy += transport_matrix[k][l] * odbiorcy_cena_sprzedazy[l]
+        l+=1
+    k+=1
+    
+print(result_transport)
+print(result_cena_zakupu)
+print(result_cena_sprzedazy)
+print(f"Zysk: {result_cena_sprzedazy - result_cena_zakupu - result_transport}")
