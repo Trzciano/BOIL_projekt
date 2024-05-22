@@ -15,7 +15,10 @@ function App() {
           path={Pages.ZAGADNIENIE_POSREDNIKA}
           element={<ZagadnieniePosrednika />}
         />
-        <Route path="*" element={<Navigate to={Pages.CPM} />} />
+        <Route
+          path="*"
+          element={<Navigate to={Pages.ZAGADNIENIE_POSREDNIKA} />}
+        />
       </Routes>
     </BrowserRouter>
   );
