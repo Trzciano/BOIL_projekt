@@ -5,9 +5,10 @@ from flask_cors import CORS, cross_origin
 
 from AlgorithmCPM.AlgorithmLeft import calculate_cpm_left
 from AlgorithmCPM.AlgorithmRight import calculate_cpm_right
+from BrokerAlgorithm.BrokerFunctions import broker_algorithm
 from Classes.TableCMPLeft import TableCMPLeft
 from Classes.TableCMPRight import TableCMPRight
-from Functions.TableToJson import convert_table_to_json
+from Functions.TableToJson import convert_table_to_json, convert_broker_data_to_json
 
 
 app = Flask(__name__)
@@ -68,6 +69,7 @@ def post_cpm_table_right():
 
     else:
         return jsonify({'error': 'Wrong method'})
+
     
 @app.route('/gantt_chart', methods=['GET'])
 @cross_origin()
@@ -78,3 +80,16 @@ def send_gant_chart():
         return send_file(image_path)
     else:
         return jsonify({'error': 'The file is not yet generated'})
+
+
+@app.route('/broker_algorithm', methods=['POST'])
+@cross_origin()
+def post_broker_algorithm():
+    if request.method == 'POST':
+        data = request.get_json()
+        
+        transport_matrix, result_transport, result_from_selling, result_from_buying, profit = broker_algorithm(data)
+        response = convert_broker_data_to_json(transport_matrix, 
+                                               result_transport, result_from_selling, result_from_buying, profit)
+        
+        return response
