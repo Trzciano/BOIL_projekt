@@ -1,7 +1,13 @@
 import React, { useState } from "react";
 import { Box, Button, Grid, TextField, Typography } from "@mui/material";
+import { APIpost } from "../../api/api";
+import { Returned_Type } from "./zagadnienieposrednika";
 
-const MatrixForm = () => {
+export type MatrixFormProps = {
+  saveResult: (data: Returned_Type | null) => void;
+};
+
+const MatrixForm: React.FC<MatrixFormProps> = ({ saveResult }) => {
   const [rows, setRows] = useState(2);
   const [cols, setCols] = useState(2);
   const [matrix, setMatrix] = useState(
@@ -35,10 +41,16 @@ const MatrixForm = () => {
     setMatrix(newMatrix);
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
-    const matrixJson = JSON.stringify(matrix);
-    console.log("Matrix:", matrixJson);
+    const return_data = await APIpost<any[][], Returned_Type>(
+      "broker_algorithm",
+      matrix
+    );
+
+    saveResult(return_data);
+
+    console.log(return_data);
   };
 
   return (
@@ -79,7 +91,7 @@ const MatrixForm = () => {
                             variant="body1"
                             sx={{ position: "absolute", top: 40, left: 0 }}
                           >
-                            Sprzedawcy
+                            Dostawcy
                           </Typography>
                           <Typography
                             variant="body1"
@@ -112,7 +124,7 @@ const MatrixForm = () => {
                         </Box>
                       ) : rowIdx === 0 ? (
                         <TextField
-                          label={`Klient ${colIdx}`}
+                          label={`Odbiorca ${colIdx}`}
                           value={matrix[rowIdx][colIdx]}
                           onChange={(e) => handleInputChange(e, rowIdx, colIdx)}
                           fullWidth
@@ -143,7 +155,7 @@ const MatrixForm = () => {
         </Box>
       )}
       <Button type="submit" variant="contained" color="primary" sx={{ mt: 3 }}>
-        Submit
+        Zapisz
       </Button>
     </Box>
   );

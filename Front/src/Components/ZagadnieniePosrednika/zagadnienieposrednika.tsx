@@ -1,38 +1,18 @@
-import { Box, Button, Container, TextField, Typography } from "@mui/material";
+import { Container, Typography } from "@mui/material";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import SaveIcon from "@mui/icons-material/Save";
 import MatrixForm from "./MatrixForm";
+import TransportMatrixVisualization from "./TransportMatrixVisualization";
 
-interface Konfiguracja {
-  ilosc_dostawcow: number;
-  ilosc_odbiorcow: number;
+export interface Returned_Type {
+  transport_matrix: number[][];
+  result_transport: number;
+  result_from_selling: number;
+  result_from_buying: number;
+  profit: number;
 }
 
 const ZagadnieniePosrednika = () => {
-  const [konfiguracja, setKonfiguracja] = useState<Konfiguracja>();
-  const [matrixData, setMatrixData] = useState<number[][] | null>(null);
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<Konfiguracja>();
-
-  const onKonfiguracjaSave = async (data: Konfiguracja) => {
-    try {
-      setKonfiguracja(data);
-      reset();
-    } catch (error: any) {
-      console.error("Błąd:", error);
-    }
-  };
-
-  const handleMatrixSubmit = (matrix: number[][]) => {
-    setMatrixData(matrix);
-    console.log("Submitted matrix:", matrix);
-  };
+  const [result, setResult] = useState<Returned_Type | null>(null);
 
   return (
     <Container
@@ -49,7 +29,9 @@ const ZagadnieniePosrednika = () => {
       <Typography variant="h6" component="span">
         Konfiguracja
       </Typography>
-      <MatrixForm />
+      <MatrixForm saveResult={setResult} />
+
+      {result && <TransportMatrixVisualization data={result} />}
     </Container>
   );
 };
