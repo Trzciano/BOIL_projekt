@@ -73,9 +73,6 @@ def setup_data(data):
     return supply, demand, selling_price, buying_price, transport_cost
 
 
-
-
-
 def znajdz_max_zysk(profit_matrix):
     max_zysk = -float('inf')  # Inicjalizujemy maksymalny zysk na bardzo małą wartość
     indeks_max = None  # Inicjalizujemy indeks maksymalnego zysku na None
@@ -89,12 +86,14 @@ def znajdz_max_zysk(profit_matrix):
 
     return max_zysk, indeks_max
 
+
 def dodaj_transport(transport_matrix, supply, demand, indeks):
     i, j = indeks
     ilosc_transportu = min(supply[i], demand[j])  # Wybieramy mniejszą wartość spośród podaży i popytu
     transport_matrix[i][j] = ilosc_transportu  # Aktualizujemy ilość transportu w macierzy transportu
     supply[i] -= ilosc_transportu  # Aktualizujemy podaż
     demand[j] -= ilosc_transportu  # Aktualizujemy popyt
+
 
 def optymalny_plan_przewozow(supply, demand, profit_matrix):
     transport_matrix = [[0 for _ in range(len(demand))] for _ in range(len(supply))]  # Tworzymy macierz transportu
